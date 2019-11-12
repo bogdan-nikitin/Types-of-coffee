@@ -6,7 +6,7 @@ lxml==4.3.2
 numexpr==2.7.0
 numpy==1.16.2
 pefile==2019.4.18
-Pillow==5.4.1
+Pillow==6.2.1
 PyInstaller==3.5
 pymorphy2==0.8
 pymorphy2-dicts==2.4.393442.3710985
