@@ -21,9 +21,21 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
+       <enum>QAbstractScrollArea::AdjustIgnored</enum>
       </property>
+      <attribute name="horizontalHeaderCascadingSectionResizes">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>false</bool>
+      </attribute>
       <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderCascadingSectionResizes">
        <bool>false</bool>
       </attribute>
       <column>
@@ -48,7 +60,7 @@
       </column>
       <column>
        <property name="text">
-        <string>New Column</string>
+        <string>Описание вкуса</string>
        </property>
       </column>
       <column>
