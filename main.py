@@ -4,24 +4,57 @@ import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt5.QtCore import Qt
+from UI.mainUI import Ui_MainWindow
+from UI.addEditCoffeeFormUI import Ui_addEditForm
 from PyQt5 import uic
 
 
-DATABASE_PATH = 'coffee.sqlite3'
+DATABASE_PATH = 'data/coffee.sqlite3'
 GROUND_OR_GRAINS = {0: 'молотый',
                     1: 'в зёрнах'}
 GROUND_OR_GRAINS_NUMBER = 3
+TABLE_CREATE_REQUEST = '''CREATE TABLE coffee (
+    id                  INTEGER        PRIMARY KEY AUTOINCREMENT
+                                       UNIQUE
+                                       NOT NULL,
+    sort_title          TEXT           NOT NULL,
+    degree_of_roasting  TEXT           NOT NULL,
+    ground_or_grains    INTEGER (0, 1) NOT NULL,
+    flavor_description  TEXT,
+    price               REAL,
+    volume_of_packaging REAL
+);'''
 
 
-class CoffeeAddForm(QWidget):
+def create_empty_file(full_path: str):
+    """Создаёт пустой файл в указанной директории и саму директорию"""
+    full_path = full_path.replace('\\', '/')
+    path = '/'.join(full_path.split('/')[:-1])
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    open(full_path, mode='w').close()
+
+
+def create_database_if_need():
+    if not os.path.isfile(DATABASE_PATH):
+        create_empty_file(DATABASE_PATH)
+        con = sqlite3.connect(DATABASE_PATH)
+        cur = con.cursor()
+        cur.execute(TABLE_CREATE_REQUEST)
+        con.commit()
+        con.close()
+
+
+class CoffeeAddForm(QWidget, Ui_addEditForm):
     def __init__(self, main_window):
         super().__init__()
-        uic.loadUi('addEditCoffeeForm.ui', self)
+        self.setupUi(self)
         self.main_window = main_window
         self.submit_btn.clicked.connect(self.submit)
         self.id_box.valueChanged.connect(self.change_data)
 
     def change_data(self, coffee_id):
+        create_database_if_need()
         con = sqlite3.connect(DATABASE_PATH)
         cur = con.cursor()
         element = cur.execute('SELECT * FROM coffee WHERE id = ?',
@@ -44,6 +77,7 @@ class CoffeeAddForm(QWidget):
         flavor = self.flavor_edit.text()
         price = self.price_box.value()
         volume = self.volume_box.value()
+        create_database_if_need()
         con = sqlite3.connect(DATABASE_PATH)
         cur = con.cursor()
         if (cur.execute('SELECT id FROM coffee WHERE id = ?',
@@ -68,10 +102,10 @@ class CoffeeAddForm(QWidget):
         self.deleteLater()
 
 
-class CoffeeMainWindow(QMainWindow):
+class CoffeeMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi('main.ui', self)
+        self.setupUi(self)
         self.coffee_table: QTableWidget = self.coffee_table
         self.add_form = None
         self.coffee_table.horizontalHeader().setSectionResizeMode(
@@ -81,8 +115,7 @@ class CoffeeMainWindow(QMainWindow):
 
     def load_table(self):
         self.coffee_table.setRowCount(0)
-        if not os.path.isfile(DATABASE_PATH):
-            return
+        create_database_if_need()
         con = sqlite3.connect(DATABASE_PATH)
         cur = con.cursor()
         data = cur.execute('SELECT * FROM coffee').fetchall()
